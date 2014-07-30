@@ -1,0 +1,212 @@
+<?php
+
+/**
+ * Implements hook_entity_info().
+ */
+function sentmail_entity_info() {
+  return array(
+    'sentmail' => array(
+      'label' => t('Sentmail'),
+      'base table' => 'sentmail',
+      'entity keys' => array(
+        'id' => 'sentmail_id',
+      ),
+      'uri callback' => 'entity_class_uri',
+      'entity class' => 'SentmailEntity',
+      'controller class' => 'SentmailEntityController',
+      'access callback' => 'sentmailentity_access_callback',
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sentmail_menu() {
+  $items = array();
+  $items['admin/reports/sentmail'] = array(
+    'title' => 'Sentmail',
+    'page callback' => 'sentmail_default_page',
+    'access callback' => TRUE,
+  );
+
+  $items['admin/reports/sentmail/%sentmail'] = array(
+    'title' => 'Sentmail',
+    'page callback' => 'sentmail_view_entity',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function sentmail_permission() {
+  return array(
+    'administer sentmail' =>  array(
+      'title' => t('Administer Sentmail Entities'),
+    ),
+    'view sentmail' =>  array(
+      'title' => t('View Sentmail Entities'),
+    ),
+  );
+}
+
+/**
+ * Check access permission for the sentmail enities
+ * @return TRUE/FALSE
+ */
+function sentmailentity_access_callback($op, $videoentity = NULL, $account = NULL) {
+  if ($op == 'view' && user_access('view sentmail', $account) || user_access('administer sentmail', $account)) {
+    return TRUE;
+  }
+  else if (user_access('administer sentmail', $account)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Load a single record.
+ *
+ * @param $id
+ *    The id representing the record we want to load.
+ */
+function sentmail_load($id, $reset = FALSE) {
+  return sentmail_load_multiple(array($id), array(), $reset);
+}
+/**
+ * Load multiple records.
+ */
+function sentmail_load_multiple($ids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('sentmail', $ids, $conditions, $reset);
+}
+
+function sentmail_default_page() {
+  $mail = entity_load('sentmail', array(1));
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'sentmail');
+  $result = $query->execute();
+
+  return 'hi';
+}
+
+/**
+ * Callback for 'sentmail/ID' page
+ *
+ * Renders a single instance of the entity
+ */
+function sentmail_view_entity($sentmail) {
+  $sentmail_entity = entity_view('sentmail', $sentmail);
+  return $sentmail_entity;
+}
+
+/**
+ * Impliments hook_entity_property_info
+ *
+ * Gives more information about our fields
+ */
+function sentmail_entity_property_info() {
+  $info = array();
+  $properties = &$info['sentmail']['properties'];
+
+  $properties['created'] = array(
+    'label' => t("Created"),
+    'type' => 'date',
+    'description' => t("The timestamp when the mail was sent."),
+    'setter callback' => 'entity_property_verbatim_set',
+    'schema' => 'created',
+  );
+  $properties['message'] = array(
+    'label' => t("Message"),
+    'type' => 'text',
+    'description' => t("The body of the mail that was sent."),
+    'schema' => 'message',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  return $info;
+}
+
+/**
+ * SentmailEntity class extends Entity
+ */
+class SentmailEntity extends Entity {
+  /**
+   * Override this in order to implement a custom default URI and specify
+   * 'entity_class_uri' as 'uri callback' hook_entity_info().
+   */
+  protected function defaultUri() {
+    return array('path' => 'sentmail/' . $this->identifier());
+  }
+}
+
+/**
+ * SentmailEntityController extends EntityAPIController.
+ *
+ * Our subclass of EntityAPIController lets us add a few
+ * important create, update, and delete methods.
+ */
+class SentmailEntityController extends EntityAPIController {
+  /**
+   * Override the buildConent function in EntityAPIController
+   *
+   * Adding our custom fields to the build array
+   */
+  public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
+    $build = parent::buildContent($entity, $view_mode, $langcode, $content);
+
+    $build['created'] = array(
+      '#type' => 'markup',
+      '#markup' => $entity->created,
+    );
+    $build['message'] = array(
+      '#type' => 'markup',
+      '#markup' => $entity->message,
+    );
+
+    return $build;
+  }
+
+  /**
+   * Overriding the save() function in EntityAPIController
+   *
+   * Adding a timestamp for the created field
+   */
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
+    if (isset($entity->is_new)) {
+      $entity->created = REQUEST_TIME;
+    }
+
+    return parent::save($entity, $transaction);
+  }
+}
+
+/**
+ * Override the EntityDefaultIUController
+ */
+class SentmailEntityUIController extends EntityDefaultUIController {
+
+}
+
+/**
+ * Implements hook_mail_alter().
+ */
+function sentmail_mail_alter(&$message) {
+  _sentmail_save_new_entity(serialize($message));
+}
+
+
+
+/**
+ * Helper function for saving a new entity
+ * @param  The contents of the sent mail
+ */
+function _sentmail_save_new_entity($message) {
+  $new_entity = entity_create('sentmail', array());
+  $entity_wrapper = entity_metadata_wrapper('sentmail', $new_entity);
+  $entity_wrapper->message->set($message);
+  $entity_wrapper->save();
+}

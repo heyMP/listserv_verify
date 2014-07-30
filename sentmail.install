@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ *
+ * @ingroup sentmail
+ */
+function sentmail_schema() {
+  $schema = array();
+
+  // The name of the table can be any name we choose. However, namespacing the
+  // table with the module name is best practice.
+  $schema['sentmail'] = array(
+    'description' => 'The base table for our sentmail entity.',
+    'fields' => array(
+      'sentmail_id' => array(
+        'description' => 'Primary key of the sentmail entity.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp of the entity creation time.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'message' => array(
+        'description' => 'The contents of the sent mail.',
+        'type' => 'blob',
+        'size' => 'normal',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('sentmail_id'),
+  );
+
+  return $schema;
+}
