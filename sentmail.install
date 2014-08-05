@@ -36,6 +36,12 @@ function sentmail_schema() {
         'type' => 'varchar',
         'length' => 64,
       ),
+      'verifykey_status' => array(
+        'description' => 'The status of the verifykey.',
+        'type' => 'varchar',
+        'length' => 64,
+        'default' => 'active',
+      ),
     ),
     'primary key' => array('sentmail_id'),
   );
