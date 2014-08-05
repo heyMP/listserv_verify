@@ -31,6 +31,11 @@ function sentmail_schema() {
         'size' => 'normal',
         'not null' => FALSE,
       ),
+      'verifykey' => array(
+        'description' => 'The unique key used to verify email.',
+        'type' => 'varchar',
+        'length' => 64,
+      ),
     ),
     'primary key' => array('sentmail_id'),
   );

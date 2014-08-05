@@ -127,6 +127,14 @@ function sentmail_entity_property_info() {
     'schema' => 'message',
     'setter callback' => 'entity_property_verbatim_set',
   );
+  $properties['verifykey'] = array(
+    'label' => t("Verification Key"),
+    'type' => 'varchar',
+    'description' => t("The unique key used to verify email."),
+    'schema' => 'verifykey',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+
   return $info;
 }
 
@@ -166,6 +174,10 @@ class SentmailEntityController extends EntityAPIController {
       '#type' => 'markup',
       '#markup' => $entity->message,
     );
+    $build['verifykey'] = array(
+      '#type' => 'markup',
+      '#markup' => $entity->verfiykey,
+    );
 
     return $build;
   }
@@ -195,7 +207,9 @@ class SentmailEntityUIController extends EntityDefaultUIController {
  * Implements hook_mail_alter().
  */
 function sentmail_mail_alter(&$message) {
-  _sentmail_save_new_entity(serialize($message));
+  $verifykey = uuid_generate();
+  $message['headers']['X-VerifyKey'] = $verifykey;
+  _sentmail_save_new_entity(serialize($message), $verifykey);
 }
 
 
@@ -204,9 +218,10 @@ function sentmail_mail_alter(&$message) {
  * Helper function for saving a new entity
  * @param  The contents of the sent mail
  */
-function _sentmail_save_new_entity($message) {
+function _sentmail_save_new_entity($message, $verifykey = NULL) {
   $new_entity = entity_create('sentmail', array());
   $entity_wrapper = entity_metadata_wrapper('sentmail', $new_entity);
   $entity_wrapper->message->set($message);
+  // $entity_wrapper->verifykey->set($verifykey);
   $entity_wrapper->save();
 }
