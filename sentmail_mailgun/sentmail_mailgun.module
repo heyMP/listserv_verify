@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function sentmail_mailgun_menu() {
+  $items['sentmail/api/mailgun'] = array(
+    'title' => 'Setmail Mailgun Verify',
+    'page callback' => 'sentmail_mailgun_json_accept',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function sentmail_mailgun_json_accept() {
+  $received_json = file_get_contents("php://input",  TRUE);
+  $json = drupal_json_decode($received_json, TRUE);
+
+  return print_r($json);
+}
