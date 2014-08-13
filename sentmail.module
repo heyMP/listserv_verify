@@ -5,7 +5,7 @@
  */
 function sentmail_mail_alter(&$message) {
   $verifykey = uuid_generate();
-  $message['headers']['X-VerifyKey'] = $verifykey;
+  $message['headers']['VerifyKey'] = $verifykey;
   _sentmail_record_new_entry(serialize($message), $verifykey);
 }
 
