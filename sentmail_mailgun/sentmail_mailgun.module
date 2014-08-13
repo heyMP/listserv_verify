@@ -15,8 +15,11 @@ function sentmail_mailgun_menu() {
 }
 
 function sentmail_mailgun_json_accept() {
-  $received_json = file_get_contents("php://input",  TRUE);
-  $json = drupal_json_decode($received_json, TRUE);
-
-  return print_r($json);
+  if ($_POST) {
+	  variable_set('sentmail_post', $_POST);
+  }
+  
+  $mailgunmessage = variable_get('sentmail_post', 'nothing');
+  
+  return print_r(kpr($mailgunmessage));
 }
