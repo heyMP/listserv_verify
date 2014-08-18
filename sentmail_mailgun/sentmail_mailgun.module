@@ -15,11 +15,69 @@ function sentmail_mailgun_menu() {
 }
 
 function sentmail_mailgun_json_accept() {
-  if ($_POST) {
-	  variable_set('sentmail_post', $_POST);
+  $post = _sentmail_mailgun_dev_store_json_post($_POST);
+  $key = _sentmail_find_key($post['body-plain']);
+  $status = _sentmail_mailgun_verify_key_status($key);
+
+
+  kpr($status);
+}
+
+/**
+ * This is for development purposes only. Should be deleted
+ */
+function _sentmail_mailgun_dev_store_json_post($post) {
+  if ($post) {
+    variable_set('sentmail_post', $post);
   }
-  
+
   $mailgunmessage = variable_get('sentmail_post', 'nothing');
-  
-  return print_r(kpr($mailgunmessage));
+
+  return $mailgunmessage;
+}
+
+/**
+ * Regexes a blob of text to find the verify key. This presumes that the verify
+ * key is in between 'VKE:' and ':EVKE'
+ *
+ * @param  mixed   $haystack    The blob of text that contains the verify key.
+ * @return string               The verify key.
+ */
+function _sentmail_find_key($haystack) {
+  $subject = $haystack;
+  $delimiter = '#';
+  $startTag = 'VKE:';
+  $endTag = ':EVKE';
+  $regex = $delimiter . preg_quote($startTag, $delimiter)
+                      . '(.*?)'
+                      . preg_quote($endTag, $delimiter)
+                      . $delimiter
+                      . 's';
+  preg_match($regex, $subject, $matches);
+
+  return $matches[1];
+}
+
+/**
+ * Checks the status of the verify key.
+ * @return The status of the verify key. Generally will be either 'active' or 'inactive'
+ */
+function _sentmail_mailgun_verify_key_status($key) {
+  $result = array();
+
+  // Find instances of sentmail where the key is the same as $key
+  $results = db_select('sentmail', 's')
+    ->fields('s')
+    ->condition('s.verifykey', $key,'=')
+    ->execute();
+
+  foreach ($results as $key => $value) {
+    $result[] = $value;
+  }
+
+  // We know that there will only be one unique key so we can
+  // target the first result.
+  $status = $result[0]->verifykey_status;
+
+  return $status;
 }
