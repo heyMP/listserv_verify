@@ -1,5 +1,0 @@
-name = Sentmail Mailgun
-description = Integration module to receive mailgun POSTs and verify listserv confirmation emails.
-core = 7.x
-dependencies[] = sentmail
-dependencies[] = httprl

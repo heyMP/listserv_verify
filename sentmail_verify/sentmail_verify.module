@@ -1,0 +1,141 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function sentmail_verify_menu() {
+  $items['sentmail/api/verify'] = array(
+    'title' => 'Setmail Verify',
+    'page callback' => 'sentmail_sentmail_verify_api_confirm',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function sentmail_sentmail_verify_api_confirm() {
+  $post = _sentmail_verify_dev_store_json_post($_POST);
+  $verifykeys = _sentmail_find_keys($post);
+  $verifykeys_count = count($verifykeys);
+
+  if ($verifykeys_count == 1) {
+    $status = _sentmail_verify_verify_key_status($verifykeys[0]);
+
+    /**
+     * Uses HTTPRL to make an asynchronous POST call to the listserv.
+     * Use 'print_r(httprl_pr($request))' to investigate the request.
+     *
+     * @todo Need to determine the $url with a regex
+     */
+    if ($status == 'active') {
+      // $url = "http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST";
+      $url = 'http://heymp/itnews';
+      $options = array(
+        'method' => 'POST',
+        'blocking' => FALSE,
+      );
+      httprl_request($url, $options);
+      // Execute requests.
+      $request = httprl_send_request();
+
+      // Log the action to watchdog
+      watchdog('sentmail_verify',
+        t('Listserv confirmation link posted to %url after verifying the following key: %key'),
+        array('%url' => $request[$url]->url, '%key' => $verifykeys[0])
+      );
+
+      // Set the verify key status to inactive.
+      _sentmail_verify_change_verify_key_status($verifykeys[0], 'inactive');
+
+      echo 'verified';
+    }
+    else {
+      echo 'not active';
+    }
+  }
+  elseif ($verifykeys_count > 1) {
+    watchdog('sentmail_verify', 'There as more than one verify key in the last message.', array(), WATCHDOG_ERROR, 'link');
+  }
+}
+
+/**
+ * This is for development purposes only. Should be deleted
+ */
+function _sentmail_verify_dev_store_json_post($post) {
+  if ($post) {
+    variable_set('sentmail_post', $post);
+  }
+
+  $verifymessage = variable_get('sentmail_post', 'nothing');
+
+  return $verifymessage;
+}
+
+/**
+ * Regexes a blob of text to find the verify key. This presumes that the verify
+ * key is in between 'VKE:' and ':EVKE'
+ *
+ * @param  mixed   $haystack    The blob of text that contains the verify key.
+ * @return array   $matches     An array of verify keys found.
+ */
+function _sentmail_find_keys($haystack) {
+  $keys = array();
+
+  $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
+  $delimiter = '#';
+  $startTag = 'VKE:';
+  $endTag = ':EVKE';
+  $regex = $delimiter . preg_quote($startTag, $delimiter)
+                      . '(.*?)'
+                      . preg_quote($endTag, $delimiter)
+                      . $delimiter
+                      . 's';
+  preg_match_all($regex, $subject, $matches);
+  // Remove duplicate keys. We are targeting the  second instance of the array
+  // given to us by preg_match_all which contains the verifykeys without that
+  // start and end tags from regex.
+  $keys = array_unique($matches[1]);
+
+  return $keys;
+}
+
+/**
+ * Checks the status of the verify key.
+ * @param  string   $key      The Verify Key that we are looking up in the database
+ * @return The status of the verify key. Generally will be either 'active' or 'inactive'
+ */
+function _sentmail_verify_verify_key_status($key) {
+  $result = array();
+
+  // Find instances of sentmail where the key is the same as $key
+  $results = db_select('sentmail', 's')
+    ->fields('s')
+    ->condition('s.verifykey', $key,'=')
+    ->execute();
+
+  foreach ($results as $key => $value) {
+    $result[] = $value;
+  }
+
+  // We know that there will only be one unique key so we can
+  // target the first result.
+  $status = $result[0]->verifykey_status;
+
+  return $status;
+}
+
+function _sentmail_verify_change_verify_key_status($key, $status) {
+  $result = array();
+
+  // Find instances of sentmail where the key is the same as $key
+  $results = db_select('sentmail', 's')
+    ->fields('s')
+    ->condition('s.verifykey', $key,'=')
+    ->execute();
+
+  foreach ($results as $key => $record) {
+    $record->verifykey_status = $status;
+    drupal_write_record('sentmail', $record, 'sentmail_id');
+  }
+}
