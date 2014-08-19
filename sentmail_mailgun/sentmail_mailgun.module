@@ -6,7 +6,7 @@
 function sentmail_mailgun_menu() {
   $items['sentmail/api/mailgun'] = array(
     'title' => 'Setmail Mailgun Verify',
-    'page callback' => 'sentmail_mailgun_json_accept',
+    'page callback' => 'sentmail_sentmail_mailgun_json_accept',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
@@ -14,13 +14,30 @@ function sentmail_mailgun_menu() {
   return $items;
 }
 
-function sentmail_mailgun_json_accept() {
+function sentmail_sentmail_mailgun_json_accept() {
   $post = _sentmail_mailgun_dev_store_json_post($_POST);
   $key = _sentmail_find_key($post['body-plain']);
   $status = _sentmail_mailgun_verify_key_status($key);
 
+  /**
+   * Uses HTTPRL to make an asynchronous POST call to the listserv.
+   * Use 'print_r(httprl_pr($request))' to investigate the request.
+   *
+   * @todo Need to determine the $url with a regex
+   */
+  if ($status = 'active') {
+    // $url = "http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST";
+    $url = 'http://heymp/itnews';
+    $options = array(
+      'method' => 'POST',
+      'blocking' => FALSE,
+    );
+    httprl_request($url, $options);
+    // Execute requests.
+    $request = httprl_send_request();
 
-  kpr($status);
+    watchdog('sentmail_mailgun', 'Listserv confirmation link posted to @url', array('@url' => $request[$url]->url), WATCHDOG_NOTICE, 'link');
+  }
 }
 
 /**
@@ -60,6 +77,7 @@ function _sentmail_find_key($haystack) {
 
 /**
  * Checks the status of the verify key.
+ * @param  string   $key      The Verify Key that we are looking up in the database
  * @return The status of the verify key. Generally will be either 'active' or 'inactive'
  */
 function _sentmail_mailgun_verify_key_status($key) {
