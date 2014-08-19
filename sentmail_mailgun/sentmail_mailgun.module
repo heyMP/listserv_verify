@@ -17,6 +17,7 @@ function sentmail_mailgun_menu() {
 function sentmail_sentmail_mailgun_json_accept() {
   $post = _sentmail_mailgun_dev_store_json_post($_POST);
   $key = _sentmail_find_key($post['body-plain']);
+  $key = '407b1b2f-95bf-4a1c-a2ca-250ee47e0966';
   $status = _sentmail_mailgun_verify_key_status($key);
 
   /**
@@ -25,7 +26,7 @@ function sentmail_sentmail_mailgun_json_accept() {
    *
    * @todo Need to determine the $url with a regex
    */
-  if ($status = 'active') {
+  if ($status == 'active') {
     // $url = "http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST";
     $url = 'http://heymp/itnews';
     $options = array(
@@ -36,7 +37,12 @@ function sentmail_sentmail_mailgun_json_accept() {
     // Execute requests.
     $request = httprl_send_request();
 
-    watchdog('sentmail_mailgun', 'Listserv confirmation link posted to @url', array('@url' => $request[$url]->url), WATCHDOG_NOTICE, 'link');
+    // Log the action to watchdog
+    watchdog('sentmail_mailgun',
+      t('Listserv confirmation link posted to %url after verifying the following key: %key'),
+      array('%url' => $request[$url]->url, '%key' => $key)
+    );
+    _sentmail_mailgun_change_verify_key_status($key, 'inactive');
   }
 }
 
@@ -98,4 +104,19 @@ function _sentmail_mailgun_verify_key_status($key) {
   $status = $result[0]->verifykey_status;
 
   return $status;
+}
+
+function _sentmail_mailgun_change_verify_key_status($key, $status) {
+  $result = array();
+
+  // Find instances of sentmail where the key is the same as $key
+  $results = db_select('sentmail', 's')
+    ->fields('s')
+    ->condition('s.verifykey', $key,'=')
+    ->execute();
+
+  foreach ($results as $key => $record) {
+    $record->verifykey_status = $status;
+    drupal_write_record('sentmail', $record, 'sentmail_id');
+  }
 }
