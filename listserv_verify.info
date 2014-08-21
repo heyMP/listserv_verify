@@ -1,4 +1,6 @@
 name = Listserv Verify
 description = Integration module to receive POSTs and verify listserv confirmation emails.
 core = 7.x
+package = Listserv
+
 dependencies[] = httprl
