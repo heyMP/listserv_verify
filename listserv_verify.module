@@ -32,9 +32,15 @@ function listserv_listserv_verify_api_confirm() {
     $status = _listserv_verify_verify_key_status($verifykeys[0]);
     $url = _listserv_verify_find_confirmation_link($postdata);
 
+    if ($status != 'active'){
+      echo 'Key Not Active';
+    }
+    elseif ($status == 'active' && empty($url)) {
+      echo 'Link Not Found';
+    }
     // Uses HTTPRL to make an asynchronous POST call to the listserv.
     // Use 'print_r(httprl_pr($request))' to investigate the request.
-    if ($status == 'active') {
+    elseif ($status == 'active' && !empty($url)) {
       $options = array(
         'method' => 'POST',
         'blocking' => FALSE,
@@ -51,10 +57,7 @@ function listserv_listserv_verify_api_confirm() {
 
       // Set the verify key status to inactive.
       _listserv_verify_change_verify_key_status($verifykeys[0], 'inactive');
-      echo 'Verified';
-    }
-    else {
-      echo 'Not Active';
+      echo 'Confirmed';
     }
   }
   elseif ($verifykeys_count > 1) {
@@ -84,7 +87,7 @@ function _listserv_verify_record_new_entry($message, $verifykey = NULL) {
   $record->message = $message;
   $record->verifykey = $verifykey;
 
-  drupal_write_record('listserv', $record);
+  drupal_write_record('listserv_verify', $record);
 }
 
 
@@ -145,7 +148,7 @@ function _listserv_verify_verify_key_status($key) {
 
   // We know that there will only be one unique key so we can
   // target the first result.
-  if ($result[0]) {
+  if (isset($result[0])) {
     $status = $result[0]->verifykey_status;
     return $status;
   }
@@ -162,6 +165,6 @@ function _listserv_verify_change_verify_key_status($key, $status) {
 
   foreach ($results as $key => $record) {
     $record->verifykey_status = $status;
-    drupal_write_record('listserv', $record, 'listserv_id');
+    drupal_write_record('listserv_verify', $record, 'listserv_id');
   }
 }
