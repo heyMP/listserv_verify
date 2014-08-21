@@ -117,14 +117,11 @@ function _sentmail_verify_find_confirmation_link($haystack) {
   $keys = array();
 
   $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
-  $delimiter = '#';
-  $startTag = 'http://lists.psu.edu/cgi-bin/';
-  $endTag = 'ITCOMMTEST';
   $regex = '#http\://lists\.psu\.edu/cgi\-bin/(.*)#';
   preg_match_all($regex, $subject, $matches);
   // Remove duplicate keys.
   $links = array_unique($matches[0]);
-  print_r($regex);
+
   return $links;
 }
 
