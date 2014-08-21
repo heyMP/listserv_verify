@@ -3,18 +3,18 @@
 /**
  * Implements hook_schema().
  *
- * @ingroup sentmail
+ * @ingroup listserv
  */
-function sentmail_schema() {
+function listserv_verify_schema() {
   $schema = array();
 
   // The name of the table can be any name we choose. However, namespacing the
   // table with the module name is best practice.
-  $schema['sentmail'] = array(
-    'description' => 'The base table for our sentmail entity.',
+  $schema['listserv_verify'] = array(
+    'description' => 'The base table for our listserv entity.',
     'fields' => array(
-      'sentmail_id' => array(
-        'description' => 'Primary key of the sentmail entity.',
+      'listserv_id' => array(
+        'description' => 'Primary key of the listserv entity.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -43,7 +43,7 @@ function sentmail_schema() {
         'default' => 'active',
       ),
     ),
-    'primary key' => array('sentmail_id'),
+    'primary key' => array('listserv_id'),
   );
 
   return $schema;

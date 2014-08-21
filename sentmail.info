@@ -1,4 +1,0 @@
-name = Sentmail
-description = Stores mail messages sent from Drupal.
-core = 7.x
-dependencies[] = entity

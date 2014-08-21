@@ -1,5 +1,4 @@
-name = Sentmail Verify
+name = Listserv Verify
 description = Integration module to receive POSTs and verify listserv confirmation emails.
 core = 7.x
-dependencies[] = sentmail
 dependencies[] = httprl

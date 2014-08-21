@@ -5,10 +5,10 @@
  *
  * @todo Add a unique url for the api
  */
-function sentmail_verify_menu() {
-  $items['sentmail/api/verify'] = array(
+function listserv_verify_menu() {
+  $items['listserv-verify/api/verify'] = array(
     'title' => 'Setmail Verify',
-    'page callback' => 'sentmail_sentmail_verify_api_confirm',
+    'page callback' => 'listserv_listserv_verify_api_confirm',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
@@ -21,15 +21,16 @@ function sentmail_verify_menu() {
  *
  * @todo Possibly check the header to find out where it's coming from.
  */
-function sentmail_sentmail_verify_api_confirm() {
+function listserv_listserv_verify_api_confirm() {
   // If there is no POST data then exit immediately.
   $postdata = file_get_contents("php://input") ? file_get_contents("php://input") : exit;
-  $verifykeys = _sentmail_find_keys($postdata);
+  // Find the verify keys from the post data.
+  $verifykeys = _listserv_find_keys($postdata);
   $verifykeys_count = count($verifykeys);
 
   if ($verifykeys_count == 1) {
-    $status = _sentmail_verify_verify_key_status($verifykeys[0]);
-    $url = _sentmail_verify_find_confirmation_link($postdata);
+    $status = _listserv_verify_verify_key_status($verifykeys[0]);
+    $url = _listserv_verify_find_confirmation_link($postdata);
 
     // Uses HTTPRL to make an asynchronous POST call to the listserv.
     // Use 'print_r(httprl_pr($request))' to investigate the request.
@@ -43,13 +44,13 @@ function sentmail_sentmail_verify_api_confirm() {
       $request = httprl_send_request();
 
       // Log the action to watchdog
-      watchdog('sentmail_verify',
+      watchdog('listserv_verify',
         t('Listserv confirmation link posted to %url after verifying the following key: %key'),
         array('%url' => $request[$url]->url, '%key' => $verifykeys[0])
       );
 
       // Set the verify key status to inactive.
-      _sentmail_verify_change_verify_key_status($verifykeys[0], 'inactive');
+      _listserv_verify_change_verify_key_status($verifykeys[0], 'inactive');
       echo 'Verified';
     }
     else {
@@ -57,9 +58,35 @@ function sentmail_sentmail_verify_api_confirm() {
     }
   }
   elseif ($verifykeys_count > 1) {
-    watchdog('sentmail_verify', 'There as more than one verify key in the last message.', array(), WATCHDOG_ERROR, 'link');
+    watchdog('listserv_verify', 'There as more than one verify key in the last message.', array(), WATCHDOG_ERROR, 'link');
   }
 }
+
+/**
+ * Implements hook_mail_alter().
+ */
+function listserv_verify_mail_alter(&$message) {
+  $verifykey = uuid_generate();
+  $message['body'][] = '<span style="display:none;" class="verifykey">' . $verifykey . '</span>';
+
+  _listserv_verify_record_new_entry(serialize($message), $verifykey);
+}
+
+
+
+/**
+ * Helper function for saving a new entity
+ * @param  The contents of the sent mail
+ */
+function _listserv_verify_record_new_entry($message, $verifykey = NULL) {
+  $record = new stdClass;
+  $record->created = REQUEST_TIME;
+  $record->message = $message;
+  $record->verifykey = $verifykey;
+
+  drupal_write_record('listserv', $record);
+}
+
 
 /**
  * Regexes a blob of text to find the verify key.
@@ -67,7 +94,7 @@ function sentmail_sentmail_verify_api_confirm() {
  * @param  mixed   $haystack    The blob of text that contains the verify key.
  * @return array   $matches     An array of verify keys found.
  */
-function _sentmail_find_keys($haystack) {
+function _listserv_find_keys($haystack) {
   $keys = array();
 
   $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
@@ -86,7 +113,7 @@ function _sentmail_find_keys($haystack) {
  * @param  mixed   $haystack    The blob of text that contains the verify key.
  * @return array   $links       An array of confirmation links found.
  */
-function _sentmail_verify_find_confirmation_link($haystack) {
+function _listserv_verify_find_confirmation_link($haystack) {
   $keys = array();
 
   $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
@@ -100,14 +127,14 @@ function _sentmail_verify_find_confirmation_link($haystack) {
 
 /**
  * Checks the status of the verify key.
- * @param  string   $key      The Verify Key that we are looking up in the database
- * @return The status of the verify key. Generally will be either 'active' or 'inactive'
+ * @param  string   $key  The Verify Key that we are looking up in the database
+ * @return                The status of the verify key. Generally will be either 'active' or 'inactive'
  */
-function _sentmail_verify_verify_key_status($key) {
+function _listserv_verify_verify_key_status($key) {
   $result = array();
 
-  // Find instances of sentmail where the key is the same as $key
-  $results = db_select('sentmail', 's')
+  // Find instances of listserv where the key is the same as $key
+  $results = db_select('listserv', 's')
     ->fields('s')
     ->condition('s.verifykey', $key,'=')
     ->execute();
@@ -123,17 +150,17 @@ function _sentmail_verify_verify_key_status($key) {
   return $status;
 }
 
-function _sentmail_verify_change_verify_key_status($key, $status) {
+function _listserv_verify_change_verify_key_status($key, $status) {
   $result = array();
 
-  // Find instances of sentmail where the key is the same as $key
-  $results = db_select('sentmail', 's')
+  // Find instances of listserv where the key is the same as $key
+  $results = db_select('listserv', 's')
     ->fields('s')
     ->condition('s.verifykey', $key,'=')
     ->execute();
 
   foreach ($results as $key => $record) {
     $record->verifykey_status = $status;
-    drupal_write_record('sentmail', $record, 'sentmail_id');
+    drupal_write_record('listserv', $record, 'listserv_id');
   }
 }
