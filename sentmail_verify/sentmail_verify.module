@@ -2,6 +2,8 @@
 
 /**
  * Implements hook_menu().
+ *
+ * @todo Add a unique url for the api
  */
 function sentmail_verify_menu() {
   $items['sentmail/api/verify'] = array(
