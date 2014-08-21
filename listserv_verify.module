@@ -7,7 +7,7 @@
  */
 function listserv_verify_menu() {
   $items['listserv-verify/api/verify'] = array(
-    'title' => 'Setmail Verify',
+    'title' => 'Listserv Verify',
     'page callback' => 'listserv_listserv_verify_api_confirm',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
@@ -134,9 +134,9 @@ function _listserv_verify_verify_key_status($key) {
   $result = array();
 
   // Find instances of listserv where the key is the same as $key
-  $results = db_select('listserv', 's')
-    ->fields('s')
-    ->condition('s.verifykey', $key,'=')
+  $results = db_select('listserv_verify', 'l')
+    ->fields('l')
+    ->condition('l.verifykey', $key,'=')
     ->execute();
 
   foreach ($results as $key => $value) {
@@ -145,18 +145,19 @@ function _listserv_verify_verify_key_status($key) {
 
   // We know that there will only be one unique key so we can
   // target the first result.
-  $status = $result[0]->verifykey_status;
-
-  return $status;
+  if ($result[0]) {
+    $status = $result[0]->verifykey_status;
+    return $status;
+  }
 }
 
 function _listserv_verify_change_verify_key_status($key, $status) {
   $result = array();
 
   // Find instances of listserv where the key is the same as $key
-  $results = db_select('listserv', 's')
-    ->fields('s')
-    ->condition('s.verifykey', $key,'=')
+  $results = db_select('listserv', 'l')
+    ->fields('l')
+    ->condition('l.verifykey', $key,'=')
     ->execute();
 
   foreach ($results as $key => $record) {
