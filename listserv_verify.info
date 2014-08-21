@@ -1,5 +1,5 @@
 name = Listserv Verify
-description = Integration module to receive POSTs and verify listserv confirmation emails.
+description = Integration module to receive POSTs and verify Listserv confirmation emails.
 core = 7.x
 package = Listserv
 
