@@ -72,14 +72,16 @@ function listserv_verify_mail_alter(&$message) {
   $verifykey = uuid_generate();
   $message['body'][] = '<span style="display:none;" class="verifykey">' . $verifykey . '</span>';
 
+  // Create a record of the key and message in the database.
   _listserv_verify_record_new_entry(serialize($message), $verifykey);
 }
 
 
 
 /**
- * Helper function for saving a new entity
- * @param  The contents of the sent mail
+ * Helper function for saving a new record in the database.
+ * @param  $message     The contents of the sent mail.
+ * @param  $verifykey   The unique verify key that was generated.
  */
 function _listserv_verify_record_new_entry($message, $verifykey = NULL) {
   $record = new stdClass;
@@ -154,6 +156,11 @@ function _listserv_verify_verify_key_status($key) {
   }
 }
 
+/**
+ * Helper function to change the status of the verify key.
+ * @param  $key       The unique verify key.
+ * @param  $status    The new status you would like to set the for the key.
+ */
 function _listserv_verify_change_verify_key_status($key, $status) {
   $result = array();
 
