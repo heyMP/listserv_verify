@@ -158,7 +158,7 @@ function _listserv_verify_change_verify_key_status($key, $status) {
   $result = array();
 
   // Find instances of listserv where the key is the same as $key
-  $results = db_select('listserv', 'l')
+  $results = db_select('listserv_verify', 'l')
     ->fields('l')
     ->condition('l.verifykey', $key,'=')
     ->execute();
