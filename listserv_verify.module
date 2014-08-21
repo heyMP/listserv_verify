@@ -51,8 +51,8 @@ function listserv_listserv_verify_api_confirm() {
 
       // Log the action to watchdog
       watchdog('listserv_verify',
-        t('Listserv confirmation link posted to %url after verifying the following key: %key'),
-        array('%url' => $request[$url]->url, '%key' => $verifykeys[0])
+        t('Listserv confirmation link posted to @url after verifying the following key: %key'),
+        array('@url' => array_shift($request)->url, '%key' => $verifykeys[0])
       );
 
       // Set the verify key status to inactive.
