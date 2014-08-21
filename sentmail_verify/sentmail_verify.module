@@ -15,32 +15,22 @@ function sentmail_verify_menu() {
 }
 
 /**
- * Page callback for hook_menu
+ * Page callback for hook_menu.
+ *
+ * @todo Possibly check the header to find out where it's coming from.
  */
 function sentmail_sentmail_verify_api_confirm() {
-  /**
-   * @todo Possibly check the header to find out where it's coming from.
-   */
-  // print_r(getallheaders());
-
-  $post = _sentmail_verify_dev_store_json_post($_POST);
-  // $post = "aads fasd f asdaVKE:d24a345b-d2a0-4857-b381-bad28b94bad1 asdoifaosidf VKEaso iaVKE:d24a345b-d2a0-4857-b381-bad28b94bad1adfi ";
-  $verifykeys = _sentmail_find_keys($post);
+  // If there is no POST data then exit immediately.
+  $postdata = file_get_contents("php://input") ? file_get_contents("php://input") : exit;
+  $verifykeys = _sentmail_find_keys($postdata);
   $verifykeys_count = count($verifykeys);
 
   if ($verifykeys_count == 1) {
     $status = _sentmail_verify_verify_key_status($verifykeys[0]);
+    $url = _sentmail_verify_find_confirmation_link($postdata);
 
-    $url = _sentmail_verify_find_confirmation_link($post);
-
-    print_r(kpr($url));
-
-    /**
-     * Uses HTTPRL to make an asynchronous POST call to the listserv.
-     * Use 'print_r(httprl_pr($request))' to investigate the request.
-     *
-     * @todo Need to determine the $url with a regex
-     */
+    // Uses HTTPRL to make an asynchronous POST call to the listserv.
+    // Use 'print_r(httprl_pr($request))' to investigate the request.
     if ($status == 'active') {
       $options = array(
         'method' => 'POST',
@@ -58,28 +48,15 @@ function sentmail_sentmail_verify_api_confirm() {
 
       // Set the verify key status to inactive.
       _sentmail_verify_change_verify_key_status($verifykeys[0], 'inactive');
-
-      echo 'verified';
+      echo 'Verified';
     }
     else {
-      echo 'not active';
+      echo 'Not Active';
     }
   }
   elseif ($verifykeys_count > 1) {
     watchdog('sentmail_verify', 'There as more than one verify key in the last message.', array(), WATCHDOG_ERROR, 'link');
   }
-}
-
-/**
- * This is for development purposes only. Should be deleted
- */
-function _sentmail_verify_dev_store_json_post($post) {
-  if ($post) {
-    variable_set('sentmail_post', $post);
-  }
-
-  $verifymessage = variable_get('sentmail_post', 'nothing');
-  return $verifymessage;
 }
 
 /**
