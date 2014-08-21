@@ -14,6 +14,9 @@ function sentmail_verify_menu() {
   return $items;
 }
 
+/**
+ * Page callback for hook_menu
+ */
 function sentmail_sentmail_verify_api_confirm() {
   /**
    * @todo Possibly check the header to find out where it's coming from.
@@ -21,6 +24,7 @@ function sentmail_sentmail_verify_api_confirm() {
   // print_r(getallheaders());
 
   $post = _sentmail_verify_dev_store_json_post($_POST);
+  // $post = "aads fasd f asdaVKE:d24a345b-d2a0-4857-b381-bad28b94bad1 asdoifaosidf VKEaso iaVKE:d24a345b-d2a0-4857-b381-bad28b94bad1adfi ";
   $verifykeys = _sentmail_find_keys($post);
   $verifykeys_count = count($verifykeys);
 
@@ -75,13 +79,11 @@ function _sentmail_verify_dev_store_json_post($post) {
   }
 
   $verifymessage = variable_get('sentmail_post', 'nothing');
-
   return $verifymessage;
 }
 
 /**
- * Regexes a blob of text to find the verify key. This presumes that the verify
- * key is in between 'VKE:' and ':EVKE'
+ * Regexes a blob of text to find the verify key.
  *
  * @param  mixed   $haystack    The blob of text that contains the verify key.
  * @return array   $matches     An array of verify keys found.
@@ -90,19 +92,11 @@ function _sentmail_find_keys($haystack) {
   $keys = array();
 
   $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
-  $delimiter = '#';
-  $startTag = 'VKE:';
-  $endTag = ':EVKE';
-  $regex = $delimiter . preg_quote($startTag, $delimiter)
-                      . '(.*?)'
-                      . preg_quote($endTag, $delimiter)
-                      . $delimiter
-                      . 's';
+  // This regex pattern can be found in the UUID module.
+  $regex = "#[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}#";
   preg_match_all($regex, $subject, $matches);
-  // Remove duplicate keys. We are targeting the  second instance of the array
-  // given to us by preg_match_all which contains the verifykeys without that
-  // start and end tags from regex.
-  $keys = array_unique($matches[1]);
+  // Remove duplicate keys. We are targeting the first instance of the array.
+  $keys = array_unique($matches[0]);
 
   return $keys;
 }

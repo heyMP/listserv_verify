@@ -5,7 +5,7 @@
  */
 function sentmail_mail_alter(&$message) {
   $verifykey = uuid_generate();
-  $message['body'][] = '<span style="display:none;" class="verifykey">VKE:' . $verifykey . ':EVKE</span>';
+  $message['body'][] = '<span style="display:none;" class="verifykey">' . $verifykey . '</span>';
 
   _sentmail_record_new_entry(serialize($message), $verifykey);
 }
