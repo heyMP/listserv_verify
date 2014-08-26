@@ -24,6 +24,7 @@ function listserv_verify_menu() {
 function listserv_listserv_verify_api_confirm() {
   // If there is no POST data then exit immediately.
   $postdata = file_get_contents("php://input") ? file_get_contents("php://input") : exit;
+
   // Find the verify keys from the post data.
   $verifykeys = _listserv_find_keys($postdata);
   $verifykeys_count = count($verifykeys);
@@ -62,6 +63,9 @@ function listserv_listserv_verify_api_confirm() {
   }
   elseif ($verifykeys_count > 1) {
     watchdog('listserv_verify', 'There as more than one verify key in the last message.', array(), WATCHDOG_ERROR, 'link');
+  }
+  else {
+    echo 'Key Not Found';
   }
 }
 
