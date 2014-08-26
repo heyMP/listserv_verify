@@ -1,0 +1,62 @@
+<?php
+/**
+ * Administration tests for my module.
+ *
+ * @todo Need create a test for checking the confirmation link was posted.
+ */
+class ListservVerifyTestCase extends DrupalWebTestCase {
+
+  /**
+   * Implements getInfo().
+   */
+  public static function getInfo() {
+    return array (
+      'name' => t('Listserv Verify'),
+      'description' => t('Functional test for the listserv verify.'),
+      'group' => t('Listserv Verify'),
+    );
+  }
+
+  public function setUp() {
+    // Enable any module that you will need in your tests.
+    parent::setUp('listserv_verify');
+  }
+
+  public function createNewRecord($email, $verifykey) {
+    _listserv_verify_record_new_entry($email, $verifykey);
+  }
+
+  public function sendTestEmail($email) {
+    global $base_url;
+    $options = array(
+      'method' => 'POST',
+      'data' => $email,
+    );
+
+    $request = drupal_http_request($base_url . '/listserv-verify/api/verify', $options);
+    return $request;
+  }
+
+  public function testEmail() {
+    $verifykey = 'b08ee001-7f7a-4652-a2b1-4e0aeecb395f';
+    $confirmationlink = 'http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST';
+    $email = "To APPROVE the message: http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST"
+          . "You were sent a group email from http://heymp/sentmail/."
+          . "Message sosososoo"
+          . "b08ee001-7f7a-4652-a2b1-4e0aeecb395f";
+
+    // Create a new record of the email and verify key in the database;
+    $this->createNewRecord($email, $verifykey);
+
+    // Send out a test email to the verfiy endpoint
+    $email_post = $this->sendTestEmail($email);
+    // Make sure that is says confirmed
+    $this->assertEqual($email_post->data, 'Confirmed');
+
+    // Now lets make sure that the verify key was set to inactive
+    $email_post = $this->sendTestEmail($email);
+    // Make sure that is says Key Not Active
+    $this->assertEqual($email_post->data, 'Key Not Active');
+  }
+}
+
