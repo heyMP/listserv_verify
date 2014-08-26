@@ -28,9 +28,6 @@ before_script:
   # reference and enable listserv_verify in build site
   - ln -s $(readlink -e $(cd -)) listserv_verify/drupal/sites/all/modules/listserv_verify
   - cd listserv_verify/drupal
-  - drush dl og -y
-  - drush en og_context og_purl -y
-  - drush dl replicate
   - drush --yes pm-enable listserv_verify
 
   # start a web server on port 8080, run in the background; wait for initialization
