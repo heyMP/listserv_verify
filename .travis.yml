@@ -22,7 +22,7 @@ before_script:
   - sudo apt-get install -y --force-yes php5-cgi php5-mysql
 
   # create new site, stubbing sendmail path with true to prevent delivery errors and manually resolving drush path
-  - mysql -e 'create database listserv_verify'
+  - mysql -e 'create database listserv_verify;'
   - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/listserv_verify --enable=simpletest listserv_verify og_purl
 
   # reference and enable listserv_verify in build site
