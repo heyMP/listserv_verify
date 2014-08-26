@@ -74,7 +74,7 @@ function listserv_listserv_verify_api_confirm() {
  */
 function listserv_verify_mail_alter(&$message) {
   $verifykey = uuid_generate();
-  $message['body'][] = '<span style="display:none;" class="verifykey">' . $verifykey . '</span>';
+  $message['body'][] = '<span class="verifykey">' . $verifykey . '</span>';
 
   // Create a record of the key and message in the database.
   _listserv_verify_record_new_entry(serialize($message), $verifykey);
