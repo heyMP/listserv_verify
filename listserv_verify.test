@@ -1,6 +1,7 @@
 <?php
 /**
- * Administration tests for my module.
+ * Creates a test email entry in the Listserv_Verify Table and verifies that the
+ * keys are correctly active and inactive.
  *
  * @todo Need create a test for checking the confirmation link was posted.
  */
