@@ -41,10 +41,10 @@ class ListservVerifyTestCase extends DrupalWebTestCase {
   public function testEmail() {
     $verifykey = 'b08ee001-7f7a-4652-a2b1-4e0aeecb395f';
     $confirmationlink = 'http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST';
-    $email = "To APPROVE the message: http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST"
-          . "You were sent a group email from http://heymp/sentmail/."
-          . "Message sosososoo"
-          . "b08ee001-7f7a-4652-a2b1-4e0aeecb395f";
+    $email = "To APPROVE the message: http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST <br>"
+          . "You were sent a group email from http://heymp/sentmail/. <br>"
+          . "Message sosososoo <br>"
+          . "b08ee001-7f7a-4652-a2b1-4e0aeecb395f <br>";
 
     // Create a new record of the email and verify key in the database;
     $this->createNewRecord($email, $verifykey);
