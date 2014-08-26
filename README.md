@@ -1,5 +1,7 @@
 #Listserv Verify
 
+[![Build Status](https://travis-ci.org/heyMP/listserv_verify.svg?branch=master)](https://travis-ci.org/heyMP/listserv_verify)
+
 ##Description
 This is a Drupal module that gives a website the ability to confirm Listserv approval email that the website sent to a list on the Listserv system. A unique key is included at the bottom of every outgoing email from the Drupal mail system. If an email is posted back to the Drupal Listserv Verify endpoint, the contents of the email will be parsed to look for the unique key. If a unique key is present, the module verifies that the key is active and, if it is, posts the confirmation link contained in the email. The key is then set to 'inactive' in the database.
 
