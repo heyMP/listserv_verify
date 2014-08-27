@@ -48,3 +48,17 @@ function listserv_verify_schema() {
 
   return $schema;
 }
+
+/**
+ * Implements hook_install().
+ */
+function listserv_verify_install() {
+  variable_set('listserv_verify_listener_key', user_password('8'));
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function listserv_verify_uninstall() {
+  variable_del('listserv_verify_listener_key');
+}
