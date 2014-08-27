@@ -14,7 +14,8 @@ function listserv_verify_menu() {
     'file' => 'listserv_verify.admin.inc',
   );
 
-  $items['listserv-verify/api/verify'] = array(
+  $listener_url = _listserv_verify_get_listener_url();
+  $items[$listener_url] = array(
     'title' => 'Listserv Verify',
     'page callback' => 'listserv_listserv_verify_api_confirm',
     'access arguments' => array('access content'),
