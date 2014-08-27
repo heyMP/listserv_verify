@@ -54,7 +54,8 @@ function listserv_verify_schema() {
  */
 function listserv_verify_install() {
   // Generate a uniqe listener key on module enable.
-  variable_set('listserv_verify_listener_key', user_password('8'));
+  $key = check_plain(user_password('8'));
+  variable_set('listserv_verify_listener_key', $key);
 }
 
 /**

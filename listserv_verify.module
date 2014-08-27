@@ -187,3 +187,11 @@ function _listserv_verify_change_verify_key_status($key, $status) {
     drupal_write_record('listserv_verify', $record, 'listserv_id');
   }
 }
+
+/**
+ * Helper function to return the url for the listener endpoint.
+ */
+function _listserv_verify_get_listener_url() {
+  $url = 'listserv-verify/api/' . variable_get('listserv_verify_listener_key', '');
+  return $url;
+}
