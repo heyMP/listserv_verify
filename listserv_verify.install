@@ -53,6 +53,7 @@ function listserv_verify_schema() {
  * Implements hook_install().
  */
 function listserv_verify_install() {
+  // Generate a uniqe listener key on module enable.
   variable_set('listserv_verify_listener_key', user_password('8'));
 }
 
