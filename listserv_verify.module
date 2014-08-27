@@ -14,11 +14,11 @@ function listserv_verify_menu() {
     'file' => 'listserv_verify.admin.inc',
   );
 
-  $listener_url = _listserv_verify_get_listener_url();
-  $items[$listener_url] = array(
-    'title' => 'Listserv Verify',
+  // Define a listener endpoint for the api calls.
+  $items['listserv-verify/api/%'] = array(
     'page callback' => 'listserv_listserv_verify_api_confirm',
-    'access arguments' => array('access content'),
+    'page arguments' => array(2),
+    'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
 
@@ -42,7 +42,14 @@ function listserv_verify_permission() {
  *
  * @todo Possibly check the header to find out where it's coming from.
  */
-function listserv_listserv_verify_api_confirm() {
+function listserv_listserv_verify_api_confirm($key) {
+  // Ensure the push notification was sent to the proper URL.
+  if ($key != variable_get('listserv_verify_listener_key', '')) {
+    // Log the failed attempt and bail.
+    watchdog('listserv_verify', 'Incoming push notification did not contain the proper URL key.', array(), WATCHDOG_WARNING);
+    return;
+  }
+
   // If there is no POST data then exit immediately.
   $postdata = file_get_contents("php://input") ? file_get_contents("php://input") : exit;
 
