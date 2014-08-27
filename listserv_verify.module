@@ -26,6 +26,18 @@ function listserv_verify_menu() {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function listserv_verify_permission() {
+  return array(
+    'administer listerserv verify' =>  array(
+      'title' => t('Administer Listserv Verify'),
+      'description' => t('Perform administration tasks for the listserv verify module.'),
+    ),
+  );
+}
+
+/**
  * Page callback for hook_menu.
  *
  * @todo Possibly check the header to find out where it's coming from.
