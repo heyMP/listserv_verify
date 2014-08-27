@@ -28,13 +28,12 @@ class ListservVerifyTestCase extends DrupalWebTestCase {
   }
 
   public function sendTestEmail($email) {
-    global $base_url;
     $options = array(
       'method' => 'POST',
       'data' => $email,
     );
 
-    $request = drupal_http_request($base_url . '/listserv-verify/api/verify', $options);
+    $request = drupal_http_request(url(_listserv_verify_get_listener_url(), array('absolute' => TRUE)), $options);
     return $request;
   }
 
