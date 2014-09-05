@@ -8,7 +8,7 @@
 function listserv_verify_menu() {
   $items['admin/config/services/listserv_verify'] = array(
     'title' => 'Listserv Verify',
-    'access arguments' => array('admininster listserv verify'),
+    'access arguments' => array('administer listserv verify'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('listserv_verify_admin_config_form'),
     'file' => 'listserv_verify.admin.inc',
@@ -30,7 +30,7 @@ function listserv_verify_menu() {
  */
 function listserv_verify_permission() {
   return array(
-    'administer listerserv verify' =>  array(
+    'administer listserv verify' =>  array(
       'title' => t('Administer Listserv Verify'),
       'description' => t('Perform administration tasks for the listserv verify module.'),
     ),
