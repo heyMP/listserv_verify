@@ -1,4 +1,4 @@
-#Listserv Verify
+#Listserv Verify is awesome.
 
 [![Build Status](https://travis-ci.org/heyMP/listserv_verify.svg?branch=master)](https://travis-ci.org/heyMP/listserv_verify)
 
