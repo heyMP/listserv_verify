@@ -136,7 +136,7 @@ function _listserv_find_keys($haystack) {
 
   $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
   // This regex pattern can be found in the UUID module.
-  $regex = "#[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}#";
+  $regex = "/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/";
   preg_match_all($regex, $subject, $matches);
   // Remove duplicate keys. We are targeting the first instance of the array.
   $keys = array_unique($matches[0]);
