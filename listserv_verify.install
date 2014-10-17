@@ -56,6 +56,7 @@ function listserv_verify_install() {
   // Generate a uniqe listener key on module enable.
   $key = check_plain(user_password('8'));
   variable_set('listserv_verify_listener_key', $key);
+  variable_set('listserv_verify_ip_whitelist', '');
 }
 
 /**
@@ -63,4 +64,5 @@ function listserv_verify_install() {
  */
 function listserv_verify_uninstall() {
   variable_del('listserv_verify_listener_key');
+  variable_del('listserv_verify_ip_whitelist');
 }

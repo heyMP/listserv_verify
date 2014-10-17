@@ -18,6 +18,12 @@ function listserv_verify_admin_config_form($form, &$form_state) {
     '#size' => 32,
     '#field_prefix' => url('listserv-verify/api/', array('absolute' => TRUE)),
   );
+  $form['listserv_verify_ip_whitelist'] = array(
+    '#type' => 'textfield',
+    '#title' => t('IP Whitelist'),
+    '#description' => t('Optionally add a whitelisted IP address that can post to the listserv verify endpoint.  If an IP is provided then only requests from that sender will be processed.  If no IP address is provided, the endpoint will process requests from any sender.'),
+    '#default_value' => variable_get('listserv_verify_ip_whitelist', ''),
+  );
 
   return system_settings_form($form);
 }

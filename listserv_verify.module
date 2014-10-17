@@ -50,10 +50,19 @@ function listserv_listserv_verify_api_confirm($key) {
     return;
   }
 
-  // Information that was received from the http post.
-  $postdata = array();
+  // Check if there are any whitlisted hosts.
+  $ip_whitelist = variable_get('listserv_verify_ip_whitelist', '');
+
+  if ($ip_whitelist) {
+    if ($ip_whitelist != $_SERVER['REMOTE_ADDR']) {
+      echo 'ip address not authorized';
+      exit;
+    }
+  }
 
   // If there is no post data then exit immediatly.
+  $postdata = array();
+
   if (!file_get_contents("php://input") && !$_POST) {
     echo 'no post data';
     exit;
