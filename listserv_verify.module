@@ -62,7 +62,6 @@ function listserv_listserv_verify_api_confirm($key) {
 
   // If there is no post data then exit immediatly.
   $postdata = array();
-
   if (!file_get_contents("php://input") && !$_POST) {
     echo 'no post data';
     exit;
@@ -150,8 +149,8 @@ function _listserv_verify_record_new_entry($message, $verifykey = NULL) {
  */
 function _listserv_find_keys($haystack) {
   $keys = array();
-
-  $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
+  // Turn the array into a string
+  $subject = serialize($haystack);
   // This regex pattern can be found in the UUID module.
   $regex = "/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/";
   preg_match_all($regex, $subject, $matches);
@@ -169,8 +168,8 @@ function _listserv_find_keys($haystack) {
  */
 function _listserv_verify_find_confirmation_link($haystack) {
   $keys = array();
-
-  $subject = is_array($haystack) ? implode(" ", $haystack) : $haystack;
+  // Turn the array into a string
+  $subject = serialize($haystack);
   $regex = '#http\://lists\.psu\.edu/cgi\-bin/(.*)#';
   preg_match_all($regex, $subject, $matches);
   // Remove duplicate keys.
