@@ -1,0 +1,6 @@
+name = Listserv Verify Mailgun
+description = Uses the Mailgun API module to retreive email attachments from mailgun.
+core = 7.x
+package = Listserv
+
+dependencies[] = listserv_verify

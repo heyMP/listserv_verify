@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ *
+ * @todo Add a unique url for the api
+ */
+function listserv_verify_mailgun_menu() {
+  $items['admin/config/services/listserv_verify/mailgun'] = array(
+    'title' => 'Liserv Verify Mailgun',
+    'access arguments' => array('administer listserv verify'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('listserv_verify_mailgun_admin_config_form'),
+    'file' => 'listserv_verify_mailgun.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Impliments the hook_listserv_verify_postdata_alter()
+ */
+function listserv_verify_mailgun_listserv_verify_postdata_alter(&$postdata) {
+  if (isset($postdata[0]['message-url'])) {
+    $url = $postdata[0]['message-url'];
+    $options = array(
+      'method' => 'GET',
+      // Set the 'Accept' header to get the raw value of the email attachment.
+      'headers' => array(
+        'Accept' => 'message/rfc2822',
+      ),
+    );
+
+    $postdata[] = _listserv_verify_mailgun_connect($url, $options);
+  }
+}
+
+/**
+ * Helper function for connecting to Mailgun via the drupal_http_request().
+ */
+function _listserv_verify_mailgun_connect($url, $options) {
+  // Mailgun uses api as its username
+  $username = 'api';
+  $password = variable_get('listserv_verify_mailgun_key');
+  $username_password = $username . ':' . $password;
+  $options['headers']['Authorization'] = 'Basic ' . base64_encode($username_password);
+  // If a Mailgun api key is present then try to connect to mailgun
+  if ($password) {
+    return drupal_http_request($url, $options);
+  }
+  else {
+    watchdog('listserv_verify_mailgun', 'Listserv verify is attempting to connect to Mailgun but no api key exists.
+      Please enter your Mailgun api key on the configuration page.', array(), WATCHDOG_ERROR);
+    return 'fail';
+  }
+}

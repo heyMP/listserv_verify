@@ -69,7 +69,10 @@ function listserv_listserv_verify_api_confirm($key) {
   else {
     $postdata[] = $_POST;
     $postdata[] = file_get_contents("php://input");
+    drupal_alter('listserv_verify_postdata', $postdata);
   }
+
+  ddl($postdata);
 
   // Find the verify keys from the post data.
   $verifykeys = _listserv_find_keys($postdata);
