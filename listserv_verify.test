@@ -39,7 +39,7 @@ class ListservVerifyTestCase extends DrupalWebTestCase {
 
   public function testEmail() {
     $verifykey = 'b08ee001-7f7a-4652-a2b1-4e0aeecb395f';
-    $confirmationlink = 'http://lists.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST';
+    $confirmationlink = 'http://massmail.psu.edu/cgi-bin/wa?OK=F61E4971&L=L-ITCOMMTEST';
     $module_path = drupal_get_path('module', 'listserv_verify');
     $email = file_get_contents($module_path . '/tests/email.txt');
 
