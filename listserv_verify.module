@@ -84,9 +84,11 @@ function listserv_listserv_verify_api_confirm($key) {
 
     if ($status != 'active'){
       echo 'Key Not Active';
+      ddl('Key Not Active ' . $verifykeys[0]);
     }
     elseif ($status == 'active' && empty($url)) {
       echo 'Link Not Found';
+      ddl('link not found ' . $verifykeys[0]);
     }
     // Uses HTTPRL to make an asynchronous POST call to the listserv.
     // Use 'print_r(httprl_pr($request))' to investigate the request.
@@ -123,7 +125,7 @@ function listserv_listserv_verify_api_confirm($key) {
  */
 function listserv_verify_mail_alter(&$message) {
   $verifykey = uuid_generate();
-  $message['body'][] = '<span class="verifykey">' . $verifykey . '</span>';
+  $message['headers']['X-Listserv-Verify-Key'] = $verifykey;
 
   // Create a record of the key and message in the database.
   _listserv_verify_record_new_entry(serialize($message), $verifykey);
@@ -173,7 +175,7 @@ function _listserv_verify_find_confirmation_link($haystack) {
   $keys = array();
   // Turn the array into a string
   $subject = serialize($haystack);
-  $regex = '#http\://lists\.psu\.edu/cgi\-bin/(.*)#';
+  $regex = '#http\://massmail\.psu\.edu/cgi\-bin/(.*)#';
   preg_match_all($regex, $subject, $matches);
   // Remove duplicate keys.
   $links = array_unique($matches[0]);
