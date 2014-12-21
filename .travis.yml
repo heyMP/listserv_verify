@@ -4,24 +4,23 @@ php:
   - 5.3
 
 mysql:
-  database: drupal
+  database: listserv_verify
   username: root
   encoding: utf8
 
-before_install:
-  - sudo apt-get update > /dev/null
-  - composer self-update
-
-install:
-  # install php packages required for running a web server from drush on php 5.3
-  - sudo apt-get install -y --force-yes php5-cgi php5-mysql
+before_script:
+  # navigate out of module directory to prevent blown stack by recursive module lookup
+  - cd ../..
 
   # install drush
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - composer global require drush/drush:6.*
+  - pear channel-discover pear.drush.org
+  - pear install drush/drush-5.8.0
   - phpenv rehash
 
-before_script:
+  # install php packages required for running a web server from drush on php 5.3
+  - sudo apt-get update > /dev/null
+  - sudo apt-get install -y --force-yes php5-cgi php5-mysql
+
   # create new site, stubbing sendmail path with true to prevent delivery errors and manually resolving drush path
   - mysql -e 'create database listserv_verify;'
   - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/listserv_verify --enable=simpletest listserv_verify og_purl
@@ -31,31 +30,11 @@ before_script:
   - cd listserv_verify/drupal
   - drush --yes pm-enable listserv_verify
 
-  # Create Drush alias.
-  - cd behat
-  - composer install --prefer-source
-
-script:
-  # Create display.
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - sleep 3 # give xvfb some time to start
-
   # start a web server on port 8080, run in the background; wait for initialization
-  - drush @negawatt runserver 127.0.0.1:8080 &
+  - drush runserver 127.0.0.1:8080 &
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
-  # Run selenium.
-  - wget http://selenium-release.storage.googleapis.com/2.40/selenium-server-standalone-2.40.0.jar
-  - java -jar selenium-server-standalone-2.40.0.jar -p 4444 &
-  - sleep 5
+script: drush test-run listserv_verify,"Listserv Verify" --debug --uri=http://127.0.0.1:8080
 
-  # Run phantomJs.
-  - phantomjs --webdriver=4444 > ~/phantomjs.log 2>&1 &
-
-  # Run behat tests.
-  - cd ../behat
-  - ./bin/behat --tags=~@wip
-
-  # Print log ~/phantomjs.log
-  - cat ~/phantomjs.log
+notifications:
+  slack: psudug:Y3Ixc2K3K61BYp0Tsx7AnLwI
