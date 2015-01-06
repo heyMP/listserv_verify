@@ -72,7 +72,8 @@ function listserv_listserv_verify_api_confirm($key) {
     drupal_alter('listserv_verify_postdata', $postdata);
   }
 
-  ddl($postdata);
+  // If you need to inspect the post data uncomment below:
+  // ddl($postdata);
 
   // Find the verify keys from the post data.
   $verifykeys = _listserv_find_keys($postdata);
@@ -124,11 +125,25 @@ function listserv_listserv_verify_api_confirm($key) {
  * Implements hook_mail_alter().
  */
 function listserv_verify_mail_alter(&$message) {
+  // Get a list of message ids that were specified
+  $messageids = variable_get('listserv_verify_message_ids', '');
+  // Turn the message ids into an array to search through
+  $messageid_array = preg_split('/,| /', $messageids);
   $verifykey = uuid_generate();
   $message['headers']['X-Listserv-Verify-Key'] = $verifykey;
 
-  // Create a record of the key and message in the database.
-  _listserv_verify_record_new_entry(serialize($message), $verifykey);
+  if ($messageids) {
+    if (in_array($message['id'], $messageid_array)) {
+      // If there are message ids specified then check if this message is one
+      // of those, create a record of the key and message in the database.
+      _listserv_verify_record_new_entry(serialize($message), $verifykey);
+    }
+  }
+  else {
+    // If there are no message ids specified then assume we want to track it,
+    // create a record of the key and message in the database.
+    _listserv_verify_record_new_entry(serialize($message), $verifykey);
+  }
 }
 
 /**

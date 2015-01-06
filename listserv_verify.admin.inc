@@ -24,6 +24,12 @@ function listserv_verify_admin_config_form($form, &$form_state) {
     '#description' => t('Optionally add a whitelisted IP address that can post to the listserv verify endpoint.  If an IP is provided then only requests from that sender will be processed.  If no IP address is provided, the endpoint will process requests from any sender.'),
     '#default_value' => variable_get('listserv_verify_ip_whitelist', ''),
   );
+  $form['listserv_verify_message_ids'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Message IDs'),
+    '#description' => t('A space or comma separated list of message ids that you would like listserv verify to log. If no message ids are selected, all messages will be logged.'),
+    '#default_value' => variable_get('listserv_verify_message_ids', ''),
+  );
 
   return system_settings_form($form);
 }
