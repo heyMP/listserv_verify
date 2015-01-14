@@ -55,6 +55,7 @@ function listserv_listserv_verify_api_confirm($key) {
 
   if ($ip_whitelist) {
     if ($ip_whitelist != $_SERVER['REMOTE_ADDR']) {
+      watchdog('listserv_verify', 'Incoming push notification did not come from a whitelisted host.', array(), WATCHDOG_WARNING);
       echo 'ip address not authorized';
       exit;
     }
@@ -117,6 +118,7 @@ function listserv_listserv_verify_api_confirm($key) {
     watchdog('listserv_verify', 'There as more than one verify key in the last message.', array(), WATCHDOG_ERROR, 'link');
   }
   else {
+    watchdog('listserv_verify', 'Incoming push notification did not contain a valid key.', array(), WATCHDOG_WARNING);
     echo 'Key Not Found';
   }
 }
